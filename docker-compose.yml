@@ -1,0 +1,65 @@
+version: "3.9"
+services:
+  web:
+    build: .
+    environment:
+      DJANGO_SUPERUSER_USERNAME: admin
+      DJANGO_SUPERUSER_EMAIL: example@example.com
+      DJANGO_SUPERUSER_PASSWORD: 5918
+    ports:
+      - "9002:9002"
+    command: >
+      bash -c "python manage.py makemigrations --noinput && 
+               python manage.py migrate --noinput && 
+               python manage.py collectstatic --noinput && 
+               gunicorn core.wsgi:application --bind 0.0.0.0:9002 --workers 1 --threads 2"
+    volumes:
+      - .:/code
+    depends_on:
+      - postgres
+      - redis
+
+  postgres:
+    image: "postgres:14"
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_PASSWORD: "5918"
+      POSTGRES_DB: "meta_stats_db"
+    expose:
+      - 5432
+
+  redis:
+    image: redis:alpine
+
+  celery:
+    restart: always
+    build:
+      context: .
+    command: >
+      sh -c "celery -A core purge -f &&
+             celery -A core worker -l info --concurrency=6"
+    volumes:
+      - .:/code
+      - static_volume:/code/staticfiles
+      - media_volume:/code/media
+    depends_on:
+      - web
+      - redis
+
+  celery-beat:
+    restart: always
+    build:
+      context: .
+    command: "celery -A core beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler"
+    volumes:
+      - .:/code
+      - static_volume:/code/staticfiles
+      - media_volume:/code/media
+    depends_on:
+      - web
+      - redis
+
+volumes:
+  postgres_data:
