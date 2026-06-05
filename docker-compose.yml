@@ -7,12 +7,12 @@ services:
       DJANGO_SUPERUSER_EMAIL: example@example.com
       DJANGO_SUPERUSER_PASSWORD: 5918
     ports:
-      - "9002:9002"
+      - "9200:9200"
     command: >
       bash -c "python manage.py makemigrations --noinput && 
                python manage.py migrate --noinput && 
                python manage.py collectstatic --noinput && 
-               gunicorn core.wsgi:application --bind 0.0.0.0:9002 --workers 1 --threads 2"
+               gunicorn core.wsgi:application --bind 0.0.0.0:9200 --workers 1 --threads 2"
     volumes:
       - .:/code
     depends_on:
@@ -22,13 +22,13 @@ services:
   postgres:
     image: "postgres:14"
     restart: unless-stopped
+    ports:
+      - "9201:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     environment:
       POSTGRES_PASSWORD: "5918"
       POSTGRES_DB: "meta_stats_db"
-    expose:
-      - 5432
 
   redis:
     image: redis:alpine
