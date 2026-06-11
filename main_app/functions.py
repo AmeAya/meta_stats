@@ -23,6 +23,8 @@ def get_fb_insights(since, until, ad_account_id) -> dict:
     }
 
     response = requests.get(url, params=params)
+    print(response.status_code)
+    print(response.content)
 
     if response.status_code != 200:
         return {'status': response.status_code, 'details': f"Ошибка Meta API: {response.text}"}
