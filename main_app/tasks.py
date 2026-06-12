@@ -9,7 +9,7 @@ from .functions import get_fb_insights
 def fetch_fb_insights():
     ad_account_ids = ["act_402787028872975"]
     for ad_account_id in ad_account_ids:
-        for i in range(7):
+        for i in range(60):
             day = date.today() - timedelta(days=i + 1)
             since = str(day)
             until = str(day)
