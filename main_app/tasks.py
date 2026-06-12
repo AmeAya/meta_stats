@@ -7,7 +7,7 @@ from .functions import get_fb_insights
 
 @shared_task(base=QueueOnce, once={"graceful": True}, ignore_result=True)
 def fetch_fb_insights():
-    ad_account_ids = ["act_1341554981006249", "act_727300020106328"]
+    ad_account_ids = ["act_402787028872975"]
     for ad_account_id in ad_account_ids:
         for i in range(7):
             day = date.today() - timedelta(days=i + 1)
